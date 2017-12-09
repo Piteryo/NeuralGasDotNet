@@ -75,7 +75,9 @@
     <Compile Include="Extensions\ArrayExtension.cs" />
     <Compile Include="Extensions\HashtableExtension.cs" />
     <Compile Include="Extensions\ListExtension.cs" />
-    <Compile Include="Neuron.cs" />
+    <Compile Include="Extensions\TupleExtensions.cs" />
+    <Compile Include="Models\History.cs" />
+    <Compile Include="Models\Neuron.cs" />
     <Compile Include="Services\NeuralGas\DataGeneration\DataGenerator.cs" />
     <Compile Include="Services\NeuralGas\GrowingNeuralGas.cs" />
     <Compile Include="Services\NeuralGas\NetworkInititalizer.cs" />

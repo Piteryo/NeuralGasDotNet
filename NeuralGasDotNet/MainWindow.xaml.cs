@@ -40,33 +40,35 @@ namespace NeuralGasDotNet
 
         public ChartValues<ObservablePoint> ValuesA { get; set; }
         public ChartValues<ObservablePoint> ValuesB { get; set; }
-        public NetworkInititalizer test;
+        public NetworkInititalizer NetworkInititalizer { get; set; }
+
+        public SeriesCollection SeriesCollection { get; set; }
+
 
         private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
         {
-            var networkInititalizer = new NetworkInititalizer();
+            NetworkInititalizer = new NetworkInititalizer();
             int i = 0;
-            foreach (var point in networkInititalizer.X)
+            foreach (var point in NetworkInititalizer.X)
             {
                 if (ValuesA.Count > i)
                 {
-                    ValuesA[i].X = point[0];
-                    ValuesA[i].Y = point[1];
+                    ValuesA[i].X = point.Item1;
+                    ValuesA[i].Y = point.Item2;
                     ++i;
                 }
                 else
                 {
-                    ValuesA.Add(new ObservablePoint(point[0], point[1]));
+                    ValuesA.Add(new ObservablePoint(point.Item1, point.Item2));
                 }
             }
-            test = networkInititalizer;
         }
 
         private void ButtonBase_OnClick2(object sender, RoutedEventArgs e)
         {
-            foreach (var point in test.W)
+            foreach (var point in NetworkInititalizer.W)
             {
-                ValuesB.Add(new ObservablePoint(point[0], point[1]));
+                ValuesB.Add(new ObservablePoint(point.Item1, point.Item2));
             }
         }
     }
