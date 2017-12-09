@@ -4,9 +4,33 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:NeuralGasDotNet"
+        xmlns:wpf="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
         mc:Ignorable="d"
+        d:DesignHeight="800" d:DesignWidth="800" d:DataContext="{d:DesignInstance local:MainWindow}"
         Title="MainWindow" Height="350" Width="525">
     <Grid>
-        <Label Content="Test" />
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Button Grid.Row="0" Margin="10" Click="ButtonBase_OnClick">Запустить тренировку нейросети</Button>
+        <Button Grid.Row="1" Margin="10" Click="ButtonBase_OnClick2">Отобразить веса</Button>
+        <wpf:CartesianChart Grid.Row="2" LegendLocation="Bottom">
+            <wpf:CartesianChart.Series>
+                <wpf:ScatterSeries Title="Series A" Values="{Binding ValuesA}" />
+                <wpf:ScatterSeries Title="Series B" Values="{Binding ValuesB}"
+                                   PointGeometry="{x:Static wpf:DefaultGeometries.Diamond}" />
+                <wpf:LineSeries Values="{Binding ValuesA}" StrokeThickness="4" StrokeDashArray="2" 
+                                Stroke="#6BBA45" Fill="Transparent" LineSmoothness="0" PointGeometrySize="20"
+                                PointGeometry="{x:Static wpf:DefaultGeometries.Diamond}" 
+                                PointForeground="#6BBA45"/>
+
+            </wpf:CartesianChart.Series>
+            <wpf:CartesianChart.AxisY>
+                <!--setting the axis unit improved the labels rounding rule-->
+                <wpf:Axis Unit="1"></wpf:Axis>
+            </wpf:CartesianChart.AxisY>
+        </wpf:CartesianChart>
     </Grid>
 </Window>

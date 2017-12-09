@@ -25,7 +25,6 @@ namespace NeuralGasDotNet.Services.NeuralGas
 
         public GrowingNeuralGas(
             ICollection<List<double>> weights,
-            Hashtable kwargs,
             double winnerLearningRate,
             double neighboursLearningRate,
             double learningRateDecay = 1.0,
@@ -57,7 +56,6 @@ namespace NeuralGasDotNet.Services.NeuralGas
             };
             foreach (var neuron in neurons)
             {
-                //string buffer = neuron.Item1 + Char.MinValue;
                 ((List<int>) _neurons["id"]).Add(neuron.Item1); //////
                 ((List<List<double>>) _neurons["value"]).Add(neuron.Item2);
                 ((List<double>) _neurons["error"]).Add(neuron.Item3);
@@ -122,15 +120,16 @@ namespace NeuralGasDotNet.Services.NeuralGas
             foreach (var keyset in _ageOfConnections.Keys)
                 if (keyset.Contains(neuronId))
                 {
-                    var keysetUpd = new HashSet<int>();
-                    foreach (var key in keyset)
-                        keysetUpd.Add(key);
-                    neighboursIds.UnionWith(keysetUpd);
+                    neighboursIds.UnionWith(keyset);
                     // for the sake of algorithm functionality node is NOT a neighbour to itself
                 }
             neighboursIds.Remove(neuronId);
-            return neighboursIds.Select(id => _neurons.Get<List<int>>("id").IndexOf(id)).ToList();
+            var k = neighboursIds.Select(id => _neurons.Get<List<int>>("id").IndexOf(id)).ToList();
+            if (k.Contains(-1))
+                k.Remove(-1);                
+            return k;
         }
+
 
         public List<List<int>> get_connections_idx_pairs()
         {
@@ -151,8 +150,9 @@ namespace NeuralGasDotNet.Services.NeuralGas
             if (WithHistory == HistoryLevel.Steps)
                 _history.Add(new Hashtable
                 {
-                    {'W', _neurons.Get<List<List<double>>>("value")},
-                    {'x', kwargs["x"]}
+                    {"W", _neurons.Get<List<List<double>>>("value")},
+                    {"connections",  get_connections_idx_pairs()},
+                    {"x", kwargs["x"]}
                 });
         }
 
@@ -167,11 +167,15 @@ namespace NeuralGasDotNet.Services.NeuralGas
             var matrix = m.DenseOfArray(rawVectorDifference);
 
 
-            var distancesFromX = new List<double>
+            var distancesFromX = new List<double>();
+            for (int i = 0; i < rawVectorDifference.GetLength(0); ++i)
             {
-                matrix.SubMatrix(0, 1, 0, 2).FrobeniusNorm(),
-                matrix.SubMatrix(1, 1, 0, 2).FrobeniusNorm()
-            };
+                distancesFromX.Add(matrix.SubMatrix(i, 1, 0, 2).FrobeniusNorm());
+            }
+            //{
+            //    matrix.SubMatrix(0, 1, 0, 2).FrobeniusNorm(),
+            //    matrix.SubMatrix(1, 1, 0, 2).FrobeniusNorm()
+            //};
 
             var sorted = distancesFromX
                 .Select((val, i) => new KeyValuePair<double, int>(val, i))
@@ -198,7 +202,7 @@ namespace NeuralGasDotNet.Services.NeuralGas
                 for (var i = 0; i < vectorDifferenceNeuron.Length; ++i)
                     vectorDifferenceNeuron[i] *= NeighboursLearningRate;
 
-                for (var i = 0; i < ((List<List<double>>) _neurons["value"])[closestNeuronIdx].Count; ++i)
+                for (var i = 0; i < ((List<List<double>>) _neurons["value"])[idx].Count; ++i)
                     ((List<List<double>>) _neurons["value"])[idx][i] -= vectorDifferenceNeuron[i];
             }
             var allNeuronIds = _neurons.Get<List<int>>("id");
@@ -216,7 +220,7 @@ namespace NeuralGasDotNet.Services.NeuralGas
             var validNeurons = new HashSet<int>();
 
 
-            foreach (var keyset in _ageOfConnections.Keys)
+            foreach (var keyset in _ageOfConnections.Keys.ToList())
                 if (ForceDying || keyset.Contains(sourceNeuronId))
                 {
                     _ageOfConnections[keyset] += 1;
@@ -234,13 +238,13 @@ namespace NeuralGasDotNet.Services.NeuralGas
                 var invalidNeuronsIds = new HashSet<int>(allNeuronIds);
                 invalidNeuronsIds.ExceptWith(validNeurons);
 
-                var invalidNeuronsIdxs = invalidNeuronsIds.Select(id => allNeuronIds.IndexOf(id));
+                var invalidNeuronsIdxs = invalidNeuronsIds.Select(id => allNeuronIds.IndexOf(id)).ToList();
                 var validIndexes = new List<int>();
                 for (var i = 0; i < allNeuronIds.Count; ++i)
                     if (!invalidNeuronsIdxs.Contains(i))
                         validIndexes.Add(i);
                 for (var i = 0; i < _neurons.Get<List<int>>("id").Count; ++i)
-                    if (!validIndexes.Contains(_neurons.Get<List<int>>("id")[i]))
+                    if (!validIndexes.Contains(i))
                     {
                         ((List<int>) _neurons["id"]).RemoveAt(i);
                         ((List<List<double>>) _neurons["value"]).RemoveAt(i);
@@ -253,8 +257,7 @@ namespace NeuralGasDotNet.Services.NeuralGas
 
         public bool _should_insert_neuron_predicate()
         {
-            return _neurons.Get<List<int>>("id").Count < MaxNeurons &&
-                   Math.Abs(IterationNum % PopulateIterationsDivisor) > _tolerance;
+            return _neurons.Get<List<int>>("id").Count < MaxNeurons && Math.Abs(IterationNum % PopulateIterationsDivisor) < _tolerance;
         }
 
         public void _insert_neuron()
@@ -270,10 +273,10 @@ namespace NeuralGasDotNet.Services.NeuralGas
             var maxError = 0.0;
             var largestErrorNeighbourNeuronIdx = 0;
             foreach (var idx in idxs)
-                if (_neurons.Get<List<double>>("id")[idx] > maxError)
+                if (_neurons.Get<List<double>>("error")[idx] > maxError)
                 {
                     largestErrorNeighbourNeuronIdx = idx;
-                    maxError = _neurons.Get<List<double>>("id")[idx];
+                    maxError = _neurons.Get<List<double>>("error")[idx];
                 }
             var newNeuronWeights = new List<double>();
             for (var i = 0; i < _neurons.Get<List<List<double>>>("value")[largestErrorNeighbourNeuronIdx].Count; ++i)
@@ -286,10 +289,10 @@ namespace NeuralGasDotNet.Services.NeuralGas
 
             //New neuron insert
             ((List<int>) _neurons["id"]).Add(newId);
-            ((List<List<double>>) _neurons["values"]).Add(newNeuronWeights);
+            ((List<List<double>>) _neurons["value"]).Add(newNeuronWeights);
             ((List<double>) _neurons["error"]).Add(
-                _neurons.Get<List<double>>("error")[largestErrorNeighbourNeuronIdx] +
-                _neurons.Get<List<double>>("error")[largestErrorNeuronIdx] / 2.0);
+                (_neurons.Get<List<double>>("error")[largestErrorNeighbourNeuronIdx] +
+                _neurons.Get<List<double>>("error")[largestErrorNeuronIdx]) / 2.0);
             //
 
             _ageOfConnections[new HashSet<int> {_neurons.Get<List<int>>("id")[largestErrorNeuronIdx], newId}] = 0;
@@ -313,7 +316,7 @@ namespace NeuralGasDotNet.Services.NeuralGas
             if (WithHistory == HistoryLevel.Epochs)
                 _history.Add(new Hashtable
                 {
-                    {'W', _neurons.Get<List<List<double>>>("value")},
+                    {"W", _neurons.Get<List<List<double>>>("value")},
                     {"connections", get_connections_idx_pairs()}
                 });
             Debug.WriteLine($"Neural gas: Ending epoch {epoch + 1} ({TotalEpoch} total)");
@@ -331,7 +334,7 @@ namespace NeuralGasDotNet.Services.NeuralGas
             _pre_fit_one(new Hashtable {{"x", x}});
             var tup1 = _update_weights_and_connections(x);
             var closestNeuronIdx = tup1.Item1;
-            var secondClosestNeuronIdx = tup1.Item2;
+                var secondClosestNeuronIdx = tup1.Item2;
             _remove_invalid_neurons(closestNeuronIdx);
             if (_should_insert_neuron_predicate())
                 _insert_neuron();
@@ -345,7 +348,10 @@ namespace NeuralGasDotNet.Services.NeuralGas
             {
                 pre_epoch(epoch);
                 foreach (var i in Order)
+                {
                     fit_one(x[i]);
+
+                }
                 _post_epoch(epoch);
             }
         }

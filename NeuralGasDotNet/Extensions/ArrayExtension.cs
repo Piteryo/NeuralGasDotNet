@@ -13,14 +13,14 @@ namespace NeuralGasDotNet.Extensions
             var width = input2DArray.GetLength(0);
             var height = input2DArray.GetLength(1);
 
-            if (row >= height)
+            if (row >= width)
                 throw new IndexOutOfRangeException("Row Index Out of Range");
             // Ensures the row requested is within the range of the 2-d array
 
 
             var returnRow = new T[width];
-            for (var i = 0; i < width; i++)
-                returnRow[i] = input2DArray[i, row];
+            for (var i = 0; i < height; i++)
+                returnRow[i] = input2DArray[row, i];
 
             return returnRow;
         }
