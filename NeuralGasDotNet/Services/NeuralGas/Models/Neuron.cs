@@ -1,4 +1,4 @@
-﻿namespace NeuralGasDotNet.Models
+﻿namespace NeuralGasDotNet.Services.NeuralGas.Models
 {
     internal class Neuron
     {

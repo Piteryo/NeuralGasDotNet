@@ -5,7 +5,8 @@ using System.Linq;
 using System.Reflection;
 using MathNet.Numerics.LinearAlgebra;
 using NeuralGasDotNet.Extensions;
-using NeuralGasDotNet.Models;
+using NeuralGasDotNet.Interfaces;
+using NeuralGasDotNet.Services.NeuralGas.Models;
 
 namespace NeuralGasDotNet.Services.NeuralGas
 {
@@ -16,15 +17,13 @@ namespace NeuralGasDotNet.Services.NeuralGas
         Steps = 2
     }
 
-    internal class GrowingNeuralGas
+    internal class GrowingNeuralGasService : IGrowingNeuralGasService
     {
-        private readonly Dictionary<(int, int), int> _ageOfConnections;
+        private Dictionary<(int, int), int> _ageOfConnections;
         private readonly List<Neuron> _neurons = new List<Neuron>();
         private readonly double _tolerance = 0.00001;
 
-        public GrowingNeuralGas(
-            MainWindow currenWindow,
-            ICollection<(double, double)> weights,
+        public void Init(ICollection<(double, double)> weights,
             double winnerLearningRate,
             double neighboursLearningRate,
             double learningRateDecay = 1.0,
@@ -33,8 +32,7 @@ namespace NeuralGasDotNet.Services.NeuralGas
             int maxNeurons = 10,
             double insertionErrorDecay = 0.8F,
             double iterationErrorDecay = 0.99,
-            bool forceDying = false
-        )
+            bool forceDying = false)
         {
             // Not really necessary, but for the sake of simplicity (no need to generate initial connections)
             // let's assume there are only 2 neurons
@@ -70,9 +68,7 @@ namespace NeuralGasDotNet.Services.NeuralGas
 
         private int NeuronIdx { get; set; }
 
-        private MainWindow CurrentWindow { get; set; }
-
-        private bool ForceDying { get; }
+        private bool ForceDying { get; set; }
 
         private int IterationNum { get; set; }
 
@@ -80,17 +76,17 @@ namespace NeuralGasDotNet.Services.NeuralGas
 
         private int TotalEpoch { get; set; }
 
-        private double IterationErrorDecay { get; }
+        private double IterationErrorDecay { get; set; }
 
-        private double InsertionErrorDecay { get; }
+        private double InsertionErrorDecay { get; set; }
 
-        private int MaxNeurons { get; }
+        private int MaxNeurons { get; set; }
 
-        private double PopulateIterationsDivisor { get; }
+        private double PopulateIterationsDivisor { get; set; }
 
-        private double EdgeMaxAge { get; }
+        private double EdgeMaxAge { get; set; }
 
-        private double LearningRateDecay { get; }
+        private double LearningRateDecay { get; set; }
 
         private double NeighboursLearningRate { get; set; }
 
