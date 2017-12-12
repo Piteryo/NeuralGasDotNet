@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using NeuralGasDotNet.Services.NeuralGas.DataGeneration;
 
 namespace NeuralGasDotNet.Services.NeuralGas
@@ -13,10 +10,10 @@ namespace NeuralGasDotNet.Services.NeuralGas
     {
         public List<(double, double)> X = DataGenerator.GenerateLineInsideCircle(150);
         public List<(double, double)> W;
-        public List<List<double>> C;
+        public List<(int, int)> C;
 
 
-        public NetworkInititalizer()
+        public NetworkInititalizer(MainWindow currentWindow)
         {
             X = new List<(double, double)>();
             using (StreamReader sr = new StreamReader("test.txt"))
@@ -30,7 +27,9 @@ namespace NeuralGasDotNet.Services.NeuralGas
                 }
 
             }
-            var gng = new GrowingNeuralGas(new List<(double, double)>
+            var gng = new GrowingNeuralGas(
+                currentWindow,
+                new List<(double, double)>
                 {
                     (0.0, 0.0),
                     (1.0, 1.0),
@@ -47,7 +46,7 @@ namespace NeuralGasDotNet.Services.NeuralGas
             var epochStride = 20;
             gng.Fit(X, epochStride);
             W = gng.GetWeights();
-            var C = gng.GetConnectionsIdxPairs();
+            C = gng.GetConnectionsIdxPairs();
         }
     }
 }

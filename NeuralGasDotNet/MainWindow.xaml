@@ -5,28 +5,69 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:NeuralGasDotNet"
         xmlns:wpf="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+        WindowState="Maximized"
+        WindowStyle="ThreeDBorderWindow"
         mc:Ignorable="d"
         d:DesignHeight="800" d:DesignWidth="800" d:DataContext="{d:DesignInstance local:MainWindow}"
-        Title="MainWindow" Height="800" Width="800">
+        Title="MainWindow">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
-        <Button Grid.Row="0" Margin="10" Click="ButtonBase_OnClick">Запустить тренировку нейросети</Button>
-        <Button Grid.Row="1" Margin="10" Click="ButtonBase_OnClick2">Отобразить веса</Button>
-        <wpf:CartesianChart Grid.Row="2" LegendLocation="Bottom">
-            <wpf:CartesianChart.Series>
-                <wpf:ScatterSeries Title="Series A" Values="{Binding ValuesA}" />
-                <wpf:ScatterSeries Title="Series B" Values="{Binding ValuesB}"
-                                   PointGeometry="{x:Static wpf:DefaultGeometries.Diamond}" />
-                <!--<wpf:LineSeries Values="{Binding ValuesA}" StrokeThickness="4" StrokeDashArray="2" 
-                                Stroke="#6BBA45" Fill="Transparent" LineSmoothness="0" PointGeometrySize="20"
-                                PointGeometry="{x:Static wpf:DefaultGeometries.Diamond}" 
-                                PointForeground="#6BBA45"/>-->
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="4*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Button Grid.Row="0" Grid.Column="0" Margin="0, 10, 0, 0" HorizontalAlignment="Center" Width="500" Click="ButtonBase_OnClick">Запустить тренировку нейросети</Button>
+        <Button Grid.Row="1"  Grid.Column="0" Margin="0, 10, 0, 0"  Width="500" HorizontalAlignment="Center" Click="ButtonBase_OnClick2">Отобразить веса</Button>
+        <ComboBox
+            HorizontalAlignment="Center"
+            Margin="10,10,0,0"
+            Grid.Column="1"
+            SelectedIndex="0"
+            Grid.Row="0"
+            ItemsSource="{Binding Data}"
+            VerticalAlignment="Top"
+            Width="150"
+            />
+        <Grid Grid.Row="2" Grid.Column="1">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
+            <StackPanel Grid.Row="0">
+                <Label HorizontalAlignment="Center" Target="{Binding ElementName=NumberOfEpochs}">Количество эпох</Label>
+                <TextBox Name="NumberOfEpochs" Width="100" HorizontalAlignment="Center" HorizontalContentAlignment="Center" AcceptsReturn="True"  VerticalScrollBarVisibility="Auto"
+                         HorizontalScrollBarVisibility="Auto">20</TextBox>
+            </StackPanel>
+            <StackPanel Grid.Row="1">
+                <Label HorizontalAlignment="Center" Target="{Binding ElementName=LearningRateDecay}">Спад скорости обучения</Label>
+                <TextBox Name="LearningRateDecay" Width="100" HorizontalAlignment="Center" HorizontalContentAlignment="Center" AcceptsReturn="True"  VerticalScrollBarVisibility="Auto"
+                         HorizontalScrollBarVisibility="Auto">1.0</TextBox>
+            </StackPanel>
+            <StackPanel Grid.Row="2">
+                <Label HorizontalAlignment="Center" Target="{Binding ElementName=EdgeMaxAge}">Максимальный возраст связи</Label>
+                <TextBox Name="EdgeMaxAge" Width="100" HorizontalAlignment="Center" AcceptsReturn="True" HorizontalContentAlignment="Center" VerticalScrollBarVisibility="Auto"
+                         HorizontalScrollBarVisibility="Auto">5</TextBox>
+            </StackPanel>
+            <StackPanel Grid.Row="3">
+                <Label HorizontalAlignment="Center" Target="{Binding ElementName=MaxNeurons}">Максимальное количество нейронов</Label>
+                <TextBox Name="MaxNeurons" Width="100" HorizontalAlignment="Center" AcceptsReturn="True" HorizontalContentAlignment="Center" VerticalScrollBarVisibility="Auto"
+                         HorizontalScrollBarVisibility="Auto">50</TextBox>
+            </StackPanel>
+            <StackPanel Grid.Row="4">
+                <Label HorizontalAlignment="Center" Target="{Binding ElementName=MaxNeurons}">Принудительная смерть нейронов</Label>
+                <CheckBox IsChecked="False" HorizontalAlignment="Center"></CheckBox>
+            </StackPanel>
+        </Grid>
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="15, 10, 5, 0" Visibility="{Binding TextBlockVisibility}" Text="{Binding TextBlockText}" />
 
-            </wpf:CartesianChart.Series>
+        <wpf:CartesianChart Visibility="{Binding GraphVisibility}" Grid.Row="2" Grid.Column="0" LegendLocation="None" Series="{Binding SeriesCollection}" Margin="0,0,10,0">
             <wpf:CartesianChart.AxisY>
                 <!--setting the axis unit improved the labels rounding rule-->
                 <wpf:Axis Unit="1"></wpf:Axis>

@@ -23,6 +23,7 @@ namespace NeuralGasDotNet.Services.NeuralGas
         private readonly double _tolerance = 0.00001;
 
         public GrowingNeuralGas(
+            MainWindow currenWindow,
             ICollection<(double, double)> weights,
             double winnerLearningRate,
             double neighboursLearningRate,
@@ -68,6 +69,8 @@ namespace NeuralGasDotNet.Services.NeuralGas
         }
 
         private int NeuronIdx { get; set; }
+
+        private MainWindow CurrentWindow { get; set; }
 
         private bool ForceDying { get; }
 

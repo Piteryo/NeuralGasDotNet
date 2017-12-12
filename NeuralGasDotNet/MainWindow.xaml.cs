@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using LiveCharts;
 using LiveCharts.Defaults;
+using LiveCharts.Wpf;
 using NeuralGasDotNet.Services.NeuralGas;
 
 namespace NeuralGasDotNet
@@ -29,25 +30,48 @@ namespace NeuralGasDotNet
             var r = new Random();
             ValuesA = new ChartValues<ObservablePoint>();
             ValuesB = new ChartValues<ObservablePoint>();
-
+            
             //for (var i = 0; i < 20; i++)
             //{
             //    ValuesA.Add(new ObservablePoint(r.NextDouble() * 10, r.NextDouble() * 10));
             //}
+            SeriesCollection = new SeriesCollection
+            {
+                new ScatterSeries
+                {
+                    Values = ValuesA,
+                },
+                new ScatterSeries
+                {
+                    Values = ValuesB,
+                    PointGeometry = DefaultGeometries.Diamond
+                }
+            };
 
+            
             DataContext = this;
         }
 
         public ChartValues<ObservablePoint> ValuesA { get; set; }
         public ChartValues<ObservablePoint> ValuesB { get; set; }
+
+        public Visibility GraphVisibility { get; set; } = Visibility.Hidden;
+
+        public Visibility TextBlockVisibility { get; set; } = Visibility.Visible;
+
+        public string TextBlockText { get; set; } = "Здесь будет выводиться информация об этапах обучения";
+
+
         public NetworkInititalizer NetworkInititalizer { get; set; }
 
         public SeriesCollection SeriesCollection { get; set; }
 
+        public List<string> Data { get; set; } = new List<string> {"Круг с линией внутри"};
+
 
         private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
         {
-            NetworkInititalizer = new NetworkInititalizer();
+            NetworkInititalizer = new NetworkInititalizer(this);
             int i = 0;
             foreach (var point in NetworkInititalizer.X)
             {
@@ -69,6 +93,20 @@ namespace NeuralGasDotNet
             foreach (var point in NetworkInititalizer.W)
             {
                 ValuesB.Add(new ObservablePoint(point.Item1, point.Item2));
+            }
+            foreach (var pair in NetworkInititalizer.C)
+            {
+                var Lines = new ChartValues<ObservablePoint>();
+                Lines.Add(new ObservablePoint(NetworkInititalizer.W[pair.Item1].Item1, NetworkInititalizer.W[pair.Item1].Item2));
+                Lines.Add(new ObservablePoint(NetworkInititalizer.W[pair.Item2].Item1, NetworkInititalizer.W[pair.Item2].Item2));
+                SeriesCollection.Add(new LineSeries
+                {
+                    Values = Lines,
+                    StrokeThickness = 4,
+                    Stroke = Brushes.Bisque,
+                    Fill = Brushes.Transparent,
+                    PointGeometrySize = 0
+                });
             }
         }
     }
