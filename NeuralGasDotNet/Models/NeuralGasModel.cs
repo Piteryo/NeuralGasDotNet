@@ -2,11 +2,16 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using LiveCharts;
+using LiveCharts.Defaults;
+using LiveCharts.Wpf;
+using NeuralGasDotNet.Extensions;
 using NeuralGasDotNet.Interfaces;
 using NeuralGasDotNet.Services;
 using NeuralGasDotNet.Services.NeuralGas;
 using NeuralGasDotNet.Services.NeuralGas.DataGeneration;
 using Prism.Mvvm;
+// ReSharper disable ExplicitCallerInfoArgument
 
 namespace NeuralGasDotNet.Models
 {
@@ -16,12 +21,36 @@ namespace NeuralGasDotNet.Models
         public List<(double, double)> W;
         public List<(int, int)> C;
         private readonly IGrowingNeuralGasService _growingNeuralGasService;
+        private string _neuralNetworkLog;
+        private SeriesCollection _seriesChartsCollection;
 
+        public string NeuralNetworkLog
+        {
+            get => _neuralNetworkLog;
+            set
+            {
+                _neuralNetworkLog = value;
+                RaisePropertyChanged(nameof(NeuralNetworkLog));
+            }
+        }
+
+
+        public SeriesCollection SeriesChartsCollection
+        {
+            get => _seriesChartsCollection;
+            set
+            {
+                _seriesChartsCollection = value;
+                RaisePropertyChanged(nameof(SeriesChartsCollection));
+            }
+        }
+
+
+        public ChartValues<ObservablePoint> InputDataChartValues { get; set; }
 
         public NeuralGasModel(IGrowingNeuralGasService growingNeuralGasService)
         {
             _growingNeuralGasService = growingNeuralGasService;
-
         }
 
         public void Init()
@@ -44,6 +73,7 @@ namespace NeuralGasDotNet.Models
                     (1.0, 1.0),
                 }, winnerLearningRate: 0.2,
                 neighboursLearningRate: 0.01,
+                neuralGasLogString: ref _neuralNetworkLog,
                 learningRateDecay: 1.0,
                 edgeMaxAge: 5,
                 populateIterationsDivisor: 100,
@@ -56,13 +86,25 @@ namespace NeuralGasDotNet.Models
             W = _growingNeuralGasService.GetWeights();
             C = _growingNeuralGasService.GetConnectionsIdxPairs();
         }
-        public List<(double, double)> GenerateData(DataGenerators dataGenerator)
+        public List<(double, double)> GenerateData(DataGenerators? dataGenerator)
         {
             switch (dataGenerator)
             {
                 case DataGenerators.CircleWithLine:
-                    if (X != null)
+                    if (X == null)
+                    {
                         X = DataGenerator.GenerateLineInsideCircle(150);
+                        InputDataChartValues = X.ToChartValues();
+                        SeriesChartsCollection = new SeriesCollection
+                        {
+                            new ScatterSeries
+                            {
+                                Values = InputDataChartValues
+                            }
+                        };
+                        
+                        RaisePropertyChanged(nameof(SeriesChartsCollection));
+                    }
                     break;
             }
             return X;

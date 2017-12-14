@@ -45,9 +45,6 @@ namespace NeuralGasDotNet.Views
                     PointGeometry = DefaultGeometries.Diamond
                 }
             };
-
-            
-            DataContext = this;
         }
 
         public ChartValues<ObservablePoint> ValuesA { get; set; }

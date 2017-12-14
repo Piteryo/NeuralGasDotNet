@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using LiveCharts;
+using LiveCharts.Defaults;
 
 namespace NeuralGasDotNet.Extensions
 {
@@ -35,5 +37,8 @@ namespace NeuralGasDotNet.Extensions
                 list[n] = value;
             }
         }
+
+        public static ChartValues<ObservablePoint> ToChartValues(this List<(double, double)> weights) => 
+            new ChartValues<ObservablePoint>(weights.Select(w => new ObservablePoint(w.Item1, w.Item2)));
     }
 }

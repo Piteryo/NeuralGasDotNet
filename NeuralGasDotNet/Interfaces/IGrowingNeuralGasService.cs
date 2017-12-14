@@ -7,6 +7,7 @@ namespace NeuralGasDotNet.Interfaces
         void Init(ICollection<(double, double)> weights,
             double winnerLearningRate,
             double neighboursLearningRate,
+            ref string neuralGasLogString,
             double learningRateDecay = 1.0,
             double edgeMaxAge = 100,
             double populateIterationsDivisor = 25,

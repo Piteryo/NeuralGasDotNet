@@ -22,10 +22,12 @@ namespace NeuralGasDotNet.Services.NeuralGas
         private Dictionary<(int, int), int> _ageOfConnections;
         private readonly List<Neuron> _neurons = new List<Neuron>();
         private readonly double _tolerance = 0.00001;
+        private string NeuralNetworkLog { get; set; }
 
         public void Init(ICollection<(double, double)> weights,
             double winnerLearningRate,
             double neighboursLearningRate,
+            ref string neuralNetworkLog,
             double learningRateDecay = 1.0,
             double edgeMaxAge = 100,
             double populateIterationsDivisor = 25,
@@ -40,12 +42,12 @@ namespace NeuralGasDotNet.Services.NeuralGas
                 throw new CustomAttributeFormatException("GNG should initially have 2 neurons");
             NeuronIdx = 0;
             _neurons.AddRange((from weight in weights
-                select new Neuron
-                {
-                    Id = NeuronIdx++,
-                    Value = weight,
-                    Error = 0
-                }).ToList());
+                               select new Neuron
+                               {
+                                   Id = NeuronIdx++,
+                                   Value = weight,
+                                   Error = 0
+                               }).ToList());
 
             _ageOfConnections = new Dictionary<(int, int), int>
             {
@@ -60,6 +62,7 @@ namespace NeuralGasDotNet.Services.NeuralGas
             MaxNeurons = maxNeurons;
             InsertionErrorDecay = insertionErrorDecay;
             IterationErrorDecay = iterationErrorDecay;
+            NeuralNetworkLog = neuralNetworkLog;
             TotalEpoch = 0;
             Order = new List<int>();
             IterationNum = 0;
@@ -98,7 +101,7 @@ namespace NeuralGasDotNet.Services.NeuralGas
             var neighboursIds = new HashSet<int>();
             foreach (var keyset in _ageOfConnections.Keys)
                 if (keyset.Contains(neuronId))
-                    neighboursIds.UnionWith(new[] {keyset.Item1, keyset.Item2});
+                    neighboursIds.UnionWith(new[] { keyset.Item1, keyset.Item2 });
             // for the sake of algorithm functionality node is NOT a neighbour to itself
             neighboursIds.Remove(neuronId);
             // ReSharper disable once PossibleNullReferenceException
@@ -138,7 +141,7 @@ namespace NeuralGasDotNet.Services.NeuralGas
             _neurons[closestNeuronIdx].Error += distancesFromX[closestNeuronIdx];
             var vectorDifferenceClosestNeuron = rawVectorDifference.GetRow(closestNeuronIdx);
             vectorDifferenceClosestNeuron = (from difference in vectorDifferenceClosestNeuron
-                select difference * WinnerLearningRate).ToArray();
+                                             select difference * WinnerLearningRate).ToArray();
 
             _neurons[closestNeuronIdx].Value = _neurons[closestNeuronIdx].Value
                 .TupleSubtraction((vectorDifferenceClosestNeuron[0], vectorDifferenceClosestNeuron[1]));
@@ -148,7 +151,7 @@ namespace NeuralGasDotNet.Services.NeuralGas
             foreach (var idx in idxs)
             {
                 var vectorDifferenceNeuron = (from difference in rawVectorDifference.GetRow(idx)
-                    select difference * NeighboursLearningRate).ToArray();
+                                              select difference * NeighboursLearningRate).ToArray();
                 _neurons[idx].Value = _neurons[idx].Value
                     .TupleSubtraction((vectorDifferenceNeuron[0], vectorDifferenceNeuron[1]));
             }
@@ -172,11 +175,11 @@ namespace NeuralGasDotNet.Services.NeuralGas
                     if (_ageOfConnections[keyset] >= EdgeMaxAge)
                         _ageOfConnections.Remove(keyset);
                     else
-                        validNeurons.UnionWith(new[] {keyset.Item1, keyset.Item2});
+                        validNeurons.UnionWith(new[] { keyset.Item1, keyset.Item2 });
                 }
                 else
                 {
-                    validNeurons.UnionWith(new[] {keyset.Item1, keyset.Item2});
+                    validNeurons.UnionWith(new[] { keyset.Item1, keyset.Item2 });
                 }
             if (validNeurons.Count != _neurons.Count)
             {
@@ -200,7 +203,7 @@ namespace NeuralGasDotNet.Services.NeuralGas
             var largestErrorNeuronIdx = !_neurons.Any()
                 ? -1
                 : _neurons
-                    .Select((neuron, index) => new {Value = neuron, Index = index})
+                    .Select((neuron, index) => new { Value = neuron, Index = index })
                     .Aggregate((a, b) => a.Value.Error > b.Value.Error ? a : b)
                     .Index;
             var idxs = GetNeighboursIdxsOfNeuron(largestErrorNeuronIdx);
@@ -246,13 +249,15 @@ namespace NeuralGasDotNet.Services.NeuralGas
         {
             WinnerLearningRate *= LearningRateDecay;
             NeighboursLearningRate *= LearningRateDecay;
-            Debug.WriteLine($"Neural gas: Ending epoch {epoch + 1} ({TotalEpoch} total)");
+            NeuralNetworkLog += $"Neural gas: Ending epoch {epoch + 1} ({TotalEpoch} total)" +
+                                Environment
+                                    .NewLine; //Debug.WriteLine($"Neural gas: Ending epoch {epoch + 1} ({TotalEpoch} total)");
         }
 
         private void PreEpoch(int epoch)
         {
             ++TotalEpoch;
-            Debug.WriteLine($"Neural gas: Beginning epoch {epoch + 1} ({TotalEpoch} total)");
+            NeuralNetworkLog += $"Neural gas: Beginning epoch {epoch + 1} ({TotalEpoch} total)" + Environment.NewLine;
             Order.Shuffle();
         }
 

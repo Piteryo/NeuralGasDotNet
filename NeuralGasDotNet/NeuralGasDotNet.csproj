@@ -119,8 +119,8 @@
     <Compile Include="Extensions\ListExtension.cs" />
     <Compile Include="Extensions\TupleExtensions.cs" />
     <Compile Include="Models\NeuralGasModel.cs" />
-    <Compile Include="Services\DataGenerators.cs" />
     <Compile Include="Interfaces\IGrowingNeuralGasService.cs" />
+    <Compile Include="Services\DataGenerators.cs" />
     <Compile Include="Services\NeuralGas\Models\History.cs" />
     <Compile Include="Services\NeuralGas\Models\Neuron.cs" />
     <Compile Include="Services\NeuralGas\DataGeneration\DataGenerator.cs" />
