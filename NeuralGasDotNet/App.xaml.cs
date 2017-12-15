@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using NeuralGasDotNet.Interfaces;
 using NeuralGasDotNet.Services.NeuralGas;
 using NeuralGasDotNet.Views;
@@ -14,9 +8,9 @@ using Unity.Lifetime;
 namespace NeuralGasDotNet
 {
     /// <summary>
-    /// Interaction logic for App.xaml
+    ///     Interaction logic for App.xaml
     /// </summary>
-    public partial class App : Application
+    public partial class App
     {
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -24,7 +18,7 @@ namespace NeuralGasDotNet
             IUnityContainer container = new UnityContainer();
             container.RegisterType<IGrowingNeuralGasService, GrowingNeuralGasService>(
                 new ContainerControlledLifetimeManager());
-            MainWindow mainWindow = container.Resolve<MainWindow>();
+            var mainWindow = container.Resolve<MainWindow>();
             mainWindow.Show();
         }
     }

@@ -4,88 +4,134 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:wpf="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
-        xmlns:system="clr-namespace:System;assembly=mscorlib"
-        xmlns:styleAlias="clr-namespace:NeuralGasDotNet.Services"
+        xmlns:helpers="clr-namespace:NeuralGasDotNet.Helpers"
         WindowState="Maximized"
         WindowStyle="ThreeDBorderWindow"
         mc:Ignorable="d"
         d:DesignHeight="800" d:DesignWidth="800"
-        Title="MainWindow">
-    <Window.Resources>
-        <ObjectDataProvider x:Key="dataFromEnum" MethodName="GetValues"
+        Title="Нейронный газ">
+    <!--<Window.Resources>
+        <ObjectDataProvider x:Key="DataFromEnum" MethodName="GetValues"
                             ObjectType="{x:Type system:Enum}">
             <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="styleAlias:DataGenerators"/>
+                <x:Type TypeName="styleAlias:GeneratorTypes" />
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
-    </Window.Resources>
+    </Window.Resources>-->
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"></RowDefinition>
-            <RowDefinition Height="Auto"></RowDefinition>
-            <RowDefinition Height="Auto"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="4*"></ColumnDefinition>
-            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="4*" />
+            <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <Button Grid.Row="0" Grid.Column="0" Margin="0, 10, 0, 0" HorizontalAlignment="Center" Width="500" Command="{Binding ShowDataCommand}" CommandParameter="{Binding ElementName=InputDataType, Path=SelectedItem}">Отобразить входные данные</Button>
-        <Button Grid.Row="1"  Grid.Column="0" Margin="0, 10, 0, 0"  Width="500" HorizontalAlignment="Center" Command="{Binding StartTrainingCommand}">Начать обучение нейросети</Button>
+        <Button Grid.Row="0" Grid.Column="0" Margin="0, 10, 0, 0" HorizontalAlignment="Center" Width="500"
+                Command="{Binding ShowDataCommand}">
+            Отобразить входные данные
+        </Button>
+        <Button Grid.Row="1" Grid.Column="0" Margin="0, 10, 0, 0" Width="500" HorizontalAlignment="Center"
+                Command="{Binding StartTrainingCommand}">
+            Начать обучение нейросети
+        </Button>
+        <Label VerticalAlignment="Bottom" HorizontalAlignment="Center" Grid.Row="0" Grid.Column="1"
+               Target="{Binding ElementName=InputDataType}">
+            <Label.Content>
+                <AccessText TextWrapping="Wrap" TextAlignment="Center" Text="Тип входных данных" />
+            </Label.Content>
+        </Label>
         <ComboBox
+            ItemsSource="{Binding Path=CurrentEffectStyle, Converter={helpers:EnumToCollectionConverter}, Mode=OneTime}"
             Name="InputDataType"
             HorizontalAlignment="Center"
-            Margin="10,10,0,0"
+            Margin="10,0,0,0"
             Grid.Column="1"
             SelectedIndex="0"
-            Grid.Row="0"
-            ItemsSource="{Binding Source={StaticResource dataFromEnum}}"
-            SelectedItem="{Binding Path=CurrentEffectStyle}"
+            Grid.Row="1"
+            ToolTip="{Binding (Validation.Errors)[0].ErrorContent, 
+            RelativeSource={RelativeSource Self}}"
+            DisplayMemberPath="Value"
+            SelectedValuePath="Key"
+            SelectedItem="{Binding SelectedItem}"
             VerticalAlignment="Top"
-            Width="150"
-            />
+            Width="150" />
         <Grid Grid.Row="2" Grid.Column="1">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
-        </Grid.RowDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
             <StackPanel Grid.Row="0">
-                <Label HorizontalAlignment="Center" Target="{Binding ElementName=NumberOfEpochs}">Количество эпох</Label>
-                <TextBox Name="NumberOfEpochs" Width="100" HorizontalAlignment="Center" HorizontalContentAlignment="Center" AcceptsReturn="True"  VerticalScrollBarVisibility="Auto"
-                         HorizontalScrollBarVisibility="Auto">20</TextBox>
+                <Label HorizontalAlignment="Center" Target="{Binding ElementName=NumberOfEpochs}">
+                    <Label.Content>
+                        <AccessText TextWrapping="Wrap" TextAlignment="Center" Text="Количество эпох" />
+                    </Label.Content>
+                </Label>
+                <TextBox PreviewTextInput="TextInputPreviewer" Name="NumberOfEpochs" Width="100"
+                         HorizontalAlignment="Center"
+                         HorizontalContentAlignment="Center" VerticalScrollBarVisibility="Auto"
+                         HorizontalScrollBarVisibility="Auto" Text="{Binding NumberOfEpochs}" />
             </StackPanel>
             <StackPanel Grid.Row="1">
-                <Label HorizontalAlignment="Center" Target="{Binding ElementName=LearningRateDecay}">Спад скорости обучения</Label>
-                <TextBox Name="LearningRateDecay" Width="100" HorizontalAlignment="Center" HorizontalContentAlignment="Center" AcceptsReturn="True"  VerticalScrollBarVisibility="Auto"
-                         HorizontalScrollBarVisibility="Auto">1.0</TextBox>
+                <Label HorizontalAlignment="Center" Target="{Binding ElementName=LearningRateDecay}">
+                    <Label.Content>
+                        <AccessText TextWrapping="Wrap" TextAlignment="Center" Text="Спад скорости обучения" />
+                    </Label.Content>
+                </Label>
+                <TextBox PreviewTextInput="TextInputPreviewer" Name="LearningRateDecay" Width="100"
+                         HorizontalAlignment="Center"
+                         HorizontalContentAlignment="Center" VerticalScrollBarVisibility="Auto"
+                         HorizontalScrollBarVisibility="Auto" Text="{Binding LearningRateDecay}" />
             </StackPanel>
             <StackPanel Grid.Row="2">
-                <Label HorizontalAlignment="Center" Target="{Binding ElementName=EdgeMaxAge}">Максимальный возраст связи</Label>
-                <TextBox Name="EdgeMaxAge" Width="100" HorizontalAlignment="Center" AcceptsReturn="True" HorizontalContentAlignment="Center" VerticalScrollBarVisibility="Auto"
-                         HorizontalScrollBarVisibility="Auto">5</TextBox>
+                <Label HorizontalAlignment="Center" Target="{Binding ElementName=EdgeMaxAge}">
+                    <Label.Content>
+                        <AccessText TextWrapping="Wrap" TextAlignment="Center" Text="Максимальный возраст связи" />
+                    </Label.Content>
+                </Label>
+                <TextBox PreviewTextInput="TextInputPreviewer" Name="EdgeMaxAge" Width="100"
+                         HorizontalAlignment="Center" AcceptsReturn="True"
+                         HorizontalContentAlignment="Center" VerticalScrollBarVisibility="Auto"
+                         HorizontalScrollBarVisibility="Auto" Text="{Binding EdgeMaxAge}" />
             </StackPanel>
             <StackPanel Grid.Row="3">
-                <Label HorizontalAlignment="Center" Target="{Binding ElementName=MaxNeurons}">Максимальное количество нейронов</Label>
-                <TextBox Name="MaxNeurons" Width="100" HorizontalAlignment="Center" AcceptsReturn="True" HorizontalContentAlignment="Center" VerticalScrollBarVisibility="Auto"
-                         HorizontalScrollBarVisibility="Auto">50</TextBox>
+                <Label HorizontalAlignment="Center" Target="{Binding ElementName=MaxNeurons}">
+                    <Label.Content>
+                        <AccessText TextWrapping="Wrap" TextAlignment="Center" Text="Максимальное количество нейронов" />
+                    </Label.Content>
+                </Label>
+                <TextBox PreviewTextInput="TextInputPreviewer" Name="MaxNeurons" Width="100"
+                         HorizontalAlignment="Center" AcceptsReturn="True"
+                         HorizontalContentAlignment="Center" VerticalScrollBarVisibility="Auto"
+                         HorizontalScrollBarVisibility="Auto" Text="{Binding MaxNumberOfNeurons}" />
             </StackPanel>
             <StackPanel Grid.Row="4">
-                <Label HorizontalAlignment="Center" Target="{Binding ElementName=MaxNeurons}">Принудительная смерть нейронов</Label>
-                <CheckBox IsChecked="False" HorizontalAlignment="Center"></CheckBox>
+                <Label HorizontalAlignment="Center" Target="{Binding ElementName=IsDying}">
+                    <Label.Content>
+                        <AccessText TextWrapping="Wrap" TextAlignment="Center" Text="Принудительная смерть нейронов" />
+                    </Label.Content>
+                </Label>
+                <CheckBox Name="IsDying" IsChecked="{Binding IsForceDying}" HorizontalAlignment="Center" />
             </StackPanel>
         </Grid>
-        <TextBlock Grid.Row="2" Grid.Column="0" Margin="15, 10, 5, 0" Visibility="{Binding TextBlockVisibility}" Text="{Binding TextBlockText}" />
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="15, 10, 5, 0" Visibility="{Binding TextBlockVisibility}"
+                   Text="{Binding TextBlockText}" />
 
-        <wpf:CartesianChart Grid.Row="2" Grid.RowSpan="2" Grid.Column="0" LegendLocation="None" Series="{Binding SeriesChartsCollection}" Margin="0,0,10,0">
+        <wpf:CartesianChart Grid.Row="2" Grid.RowSpan="2" Grid.Column="0" LegendLocation="None"
+                            Series="{Binding SeriesChartsCollection}" Margin="0,0,10,0">
             <wpf:CartesianChart.AxisY>
                 <!--setting the axis unit improved the labels rounding rule-->
-                <wpf:Axis Unit="1"></wpf:Axis>
+                <wpf:Axis Unit="1" />
             </wpf:CartesianChart.AxisY>
         </wpf:CartesianChart>
-        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding NeuralNetworkLog}"/>
+        <ScrollViewer Grid.Row="3" Grid.Column="1">
+            <TextBlock Text="{Binding NeuralNetworkLog}" />
+        </ScrollViewer>
 
     </Grid>
 </Window>

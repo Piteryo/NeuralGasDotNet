@@ -1,38 +1,42 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Windows.Media;
 using LiveCharts;
 using LiveCharts.Defaults;
 using LiveCharts.Wpf;
 using NeuralGasDotNet.Extensions;
 using NeuralGasDotNet.Interfaces;
 using NeuralGasDotNet.Services;
-using NeuralGasDotNet.Services.NeuralGas;
 using NeuralGasDotNet.Services.NeuralGas.DataGeneration;
 using Prism.Mvvm;
+// ReSharper disable AssignNullToNotNullAttribute
+
 // ReSharper disable ExplicitCallerInfoArgument
 
 namespace NeuralGasDotNet.Models
 {
-    class NeuralGasModel : BindableBase
+    /// <summary>
+    /// This class calls NeuralNetworkService to train network and helps to generate data
+    /// </summary>
+    internal class NeuralGasModel : BindableBase
     {
-        public List<(double, double)> X;
-        public List<(double, double)> W;
-        public List<(int, int)> C;
         private readonly IGrowingNeuralGasService _growingNeuralGasService;
-        private string _neuralNetworkLog;
+        private GeneratorTypes? _currentGeneratorType;
         private SeriesCollection _seriesChartsCollection;
+        public List<(int, int)> C;
+        public List<(double, double)> W;
+        public List<(double, double)> X;
 
-        public string NeuralNetworkLog
+        public NeuralGasModel(IGrowingNeuralGasService growingNeuralGasService)
         {
-            get => _neuralNetworkLog;
-            set
-            {
-                _neuralNetworkLog = value;
-                RaisePropertyChanged(nameof(NeuralNetworkLog));
-            }
+            _growingNeuralGasService = growingNeuralGasService;
+            _growingNeuralGasService.PropertyChanged += (s, e) => { RaisePropertyChanged(e.PropertyName); };
         }
+
+        public string NeuralNetworkLog => _growingNeuralGasService.NeuralNetworkLog;
 
 
         public SeriesCollection SeriesChartsCollection
@@ -48,51 +52,77 @@ namespace NeuralGasDotNet.Models
 
         public ChartValues<ObservablePoint> InputDataChartValues { get; set; }
 
-        public NeuralGasModel(IGrowingNeuralGasService growingNeuralGasService)
+        public void Init(int numberOfEpochs, double learningRateDecay, int edgeMaxAge, int maxNumberOfNeurons,
+            bool isForceDying, GeneratorTypes generatorType)
         {
-            _growingNeuralGasService = growingNeuralGasService;
-        }
+            if (X == null || !X.Any() || generatorType != _currentGeneratorType)
+                GenerateData(generatorType);
 
-        public void Init()
-        {
-            X = new List<(double, double)>();
-            //using (StreamReader sr = new StreamReader("test.txt"))
-            //{
-            //    String line;
-            //    // Read the stream to a string, and write the string to the console.
-            //    while ((line = sr.ReadLine()) != null)
-            //    {
-            //        string[] tokens = line.Split(' ');
-            //        X.Add((Double.Parse(tokens[0], CultureInfo.InvariantCulture), Double.Parse(tokens[1], CultureInfo.InvariantCulture)));
-            //    }
-
-            //}
             _growingNeuralGasService.Init(new List<(double, double)>
                 {
                     (0.0, 0.0),
-                    (1.0, 1.0),
-                }, winnerLearningRate: 0.2,
-                neighboursLearningRate: 0.01,
-                neuralGasLogString: ref _neuralNetworkLog,
-                learningRateDecay: 1.0,
-                edgeMaxAge: 5,
-                populateIterationsDivisor: 100,
-                maxNeurons: 50,
-                insertionErrorDecay: 0.8,
-                iterationErrorDecay: 0.99,
-                forceDying: false);
-            var epochStride = 20;
-            _growingNeuralGasService.Fit(X, epochStride);
+                    (1.0, 1.0)
+                }, 0.2,
+                0.01,
+                learningRateDecay,
+                edgeMaxAge,
+                100,
+                maxNumberOfNeurons,
+                0.8,
+                0.99,
+                isForceDying);
+
+            _growingNeuralGasService.Fit(X, numberOfEpochs);
             W = _growingNeuralGasService.GetWeights();
             C = _growingNeuralGasService.GetConnectionsIdxPairs();
+            ShowWeightsAndConnections();
         }
-        public List<(double, double)> GenerateData(DataGenerators? dataGenerator)
+
+        private void ShowWeightsAndConnections()
         {
-            switch (dataGenerator)
+            if (SeriesChartsCollection.Count > 1)
             {
-                case DataGenerators.CircleWithLine:
-                    if (X == null)
+                var i = SeriesChartsCollection.Count - 1;
+                while (SeriesChartsCollection.Count != 1)
+                {
+                    if (i == 0)
+                        i = SeriesChartsCollection.Count - 1;
+                    SeriesChartsCollection.RemoveAt(i--);
+                }
+
+                RaisePropertyChanged(nameof(SeriesChartsCollection));
+            }
+            var weightsChartValues = W.ToChartValues();
+            SeriesChartsCollection.Add(new ScatterSeries
+            {
+                Values = weightsChartValues,
+                PointGeometry = DefaultGeometries.Diamond,
+                Stroke = Brushes.Tomato
+            });
+            foreach (var pair in C)
+                SeriesChartsCollection.Add(new LineSeries
+                {
+                    Values = new ChartValues<ObservablePoint>
                     {
+                        new ObservablePoint(W[pair.Item1].Item1, W[pair.Item1].Item2),
+                        new ObservablePoint(W[pair.Item2].Item1, W[pair.Item2].Item2)
+                    },
+                    StrokeThickness = 4,
+                    Stroke = Brushes.Bisque,
+                    Fill = Brushes.Transparent,
+                    PointGeometrySize = 0
+                });
+            RaisePropertyChanged(nameof(SeriesChartsCollection));
+        }
+
+        public List<(double, double)> GenerateData(GeneratorTypes? generatorType)
+        {
+            switch (generatorType)
+            {
+                case GeneratorTypes.CircleWithLine:
+                    if (X == null || generatorType != _currentGeneratorType)
+                    {
+                        _currentGeneratorType = generatorType;
                         X = DataGenerator.GenerateLineInsideCircle(150);
                         InputDataChartValues = X.ToChartValues();
                         SeriesChartsCollection = new SeriesCollection
@@ -102,17 +132,119 @@ namespace NeuralGasDotNet.Models
                                 Values = InputDataChartValues
                             }
                         };
-                        
+                        RaisePropertyChanged(nameof(SeriesChartsCollection));
+                    }
+                    break;
+                case GeneratorTypes.FiveHills:
+                    if (X == null || generatorType != _currentGeneratorType)
+                    {
+                        _currentGeneratorType = generatorType;
+                        X = new List<(double, double)>();
+                        using (var sr = new StreamReader(Assembly.GetExecutingAssembly()
+                            .GetManifestResourceStream("NeuralGasDotNet.Resources.five_hills.txt")))
+                        {
+                            string line;
+                            while ((line = sr.ReadLine()) != null)
+                            {
+                                var tokens = line.Split(' ');
+                                X.Add((double.Parse(tokens[0], CultureInfo.InvariantCulture), double.Parse(tokens[1],
+                                    CultureInfo.InvariantCulture)));
+                            }
+                        }
+                        InputDataChartValues = X.ToChartValues();
+                        SeriesChartsCollection = new SeriesCollection
+                        {
+                            new ScatterSeries
+                            {
+                                Values = InputDataChartValues
+                            }
+                        };
+                        RaisePropertyChanged(nameof(SeriesChartsCollection));
+                    }
+                    break;
+                case GeneratorTypes.TwoBlobs:
+                    if (X == null || generatorType != _currentGeneratorType)
+                    {
+                        _currentGeneratorType = generatorType;
+                        X = new List<(double, double)>();
+                        using (var sr = new StreamReader(Assembly.GetExecutingAssembly()
+                            .GetManifestResourceStream("NeuralGasDotNet.Resources.two_blobs.txt")))
+                        {
+                            string line;
+                            while ((line = sr.ReadLine()) != null)
+                            {
+                                var tokens = line.Split(' ');
+                                X.Add((double.Parse(tokens[0], CultureInfo.InvariantCulture), double.Parse(tokens[1],
+                                    CultureInfo.InvariantCulture)));
+                            }
+                        }
+                        InputDataChartValues = X.ToChartValues();
+                        SeriesChartsCollection = new SeriesCollection
+                        {
+                            new ScatterSeries
+                            {
+                                Values = InputDataChartValues
+                            }
+                        };
+                        RaisePropertyChanged(nameof(SeriesChartsCollection));
+                    }
+                    break;
+                case GeneratorTypes.BlobInsideBlob:
+                    if (X == null || generatorType != _currentGeneratorType)
+                    {
+                        _currentGeneratorType = generatorType;
+                        X = new List<(double, double)>();
+                        using (var sr = new StreamReader(Assembly.GetExecutingAssembly()
+                            .GetManifestResourceStream("NeuralGasDotNet.Resources.blob_inside_blob.txt")))
+                        {
+                            string line;
+                            while ((line = sr.ReadLine()) != null)
+                            {
+                                var tokens = line.Split(' ');
+                                X.Add((double.Parse(tokens[0], CultureInfo.InvariantCulture), double.Parse(tokens[1],
+                                    CultureInfo.InvariantCulture)));
+                            }
+                        }
+                        InputDataChartValues = X.ToChartValues();
+                        SeriesChartsCollection = new SeriesCollection
+                        {
+                            new ScatterSeries
+                            {
+                                Values = InputDataChartValues
+                            }
+                        };
+                        RaisePropertyChanged(nameof(SeriesChartsCollection));
+                    }
+                    break;
+                case GeneratorTypes.Donut:
+                    if (X == null || generatorType != _currentGeneratorType)
+                    {
+                        _currentGeneratorType = generatorType;
+                        X = new List<(double, double)>();
+                        using (var sr = new StreamReader(Assembly.GetExecutingAssembly()
+                            .GetManifestResourceStream("NeuralGasDotNet.Resources.donut.txt")))
+                        {
+                            string line;
+                            while ((line = sr.ReadLine()) != null)
+                            {
+                                var tokens = line.Split(' ');
+                                X.Add((double.Parse(tokens[0], CultureInfo.InvariantCulture), double.Parse(tokens[1],
+                                    CultureInfo.InvariantCulture)));
+                            }
+                        }
+                        InputDataChartValues = X.ToChartValues();
+                        SeriesChartsCollection = new SeriesCollection
+                        {
+                            new ScatterSeries
+                            {
+                                Values = InputDataChartValues
+                            }
+                        };
                         RaisePropertyChanged(nameof(SeriesChartsCollection));
                     }
                     break;
             }
             return X;
-        }
-
-        public void Clear()
-        {
-            throw new NotImplementedException();
         }
     }
 }

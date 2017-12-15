@@ -118,10 +118,11 @@
     <Compile Include="Extensions\HashtableExtension.cs" />
     <Compile Include="Extensions\ListExtension.cs" />
     <Compile Include="Extensions\TupleExtensions.cs" />
+    <Compile Include="Helpers\EnumHelper.cs" />
+    <Compile Include="Helpers\EnumToCollectionConverter.cs" />
     <Compile Include="Models\NeuralGasModel.cs" />
     <Compile Include="Interfaces\IGrowingNeuralGasService.cs" />
-    <Compile Include="Services\DataGenerators.cs" />
-    <Compile Include="Services\NeuralGas\Models\History.cs" />
+    <Compile Include="Services\GeneratorTypes.cs" />
     <Compile Include="Services\NeuralGas\Models\Neuron.cs" />
     <Compile Include="Services\NeuralGas\DataGeneration\DataGenerator.cs" />
     <Compile Include="Services\NeuralGas\GrowingNeuralGasService.cs" />
@@ -166,6 +167,19 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\five_hills.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\two_blobs.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\blob_inside_blob.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\donut.txt" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
