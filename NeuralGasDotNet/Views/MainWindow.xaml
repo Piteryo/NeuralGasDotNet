@@ -9,7 +9,7 @@
         WindowStyle="ThreeDBorderWindow"
         mc:Ignorable="d"
         d:DesignHeight="800" d:DesignWidth="800"
-        Title="Нейронный газ">
+        Title="Neural gas">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -23,16 +23,16 @@
         </Grid.ColumnDefinitions>
         <Button Grid.Row="0" IsEnabled="{Binding ButtonsVisibility}" Grid.Column="0" Margin="0, 10, 0, 0" HorizontalAlignment="Center" Width="500"
                 Command="{Binding ShowDataCommand}">
-            Отобразить входные данные
+            Show input data
         </Button>
         <Button Grid.Row="1" IsEnabled="{Binding ButtonsVisibility}" Grid.Column="0" Margin="0, 10, 0, 0" Width="500" HorizontalAlignment="Center"
                 Command="{Binding StartTrainingCommand}">
-            Начать обучение нейросети
+            Begin neural network training
         </Button>
         <Label VerticalAlignment="Bottom" HorizontalAlignment="Center" Grid.Row="0" Grid.Column="1"
                Target="{Binding ElementName=InputDataType}">
             <Label.Content>
-                <AccessText TextWrapping="Wrap" TextAlignment="Center" Text="Тип входных данных" />
+                <AccessText TextWrapping="Wrap" TextAlignment="Center" Text="Input data type" />
             </Label.Content>
         </Label>
         <ComboBox
@@ -61,7 +61,7 @@
             <StackPanel Grid.Row="0">
                 <Label HorizontalAlignment="Center" Target="{Binding ElementName=NumberOfEpochs}">
                     <Label.Content>
-                        <AccessText TextWrapping="Wrap" TextAlignment="Center" Text="Количество эпох" />
+                        <AccessText TextWrapping="Wrap" TextAlignment="Center" Text="Number of epochs" />
                     </Label.Content>
                 </Label>
                 <TextBox PreviewTextInput="TextInputPreviewer" Name="NumberOfEpochs" Width="100"
@@ -72,7 +72,7 @@
             <StackPanel Grid.Row="1">
                 <Label HorizontalAlignment="Center" Target="{Binding ElementName=LearningRateDecay}">
                     <Label.Content>
-                        <AccessText TextWrapping="Wrap" TextAlignment="Center" Text="Спад скорости обучения" />
+                        <AccessText TextWrapping="Wrap" TextAlignment="Center" Text="Learning rate decay" />
                     </Label.Content>
                 </Label>
                 <TextBox PreviewTextInput="TextInputPreviewer" Name="LearningRateDecay" Width="100"
@@ -83,7 +83,7 @@
             <StackPanel Grid.Row="2">
                 <Label HorizontalAlignment="Center" Target="{Binding ElementName=EdgeMaxAge}">
                     <Label.Content>
-                        <AccessText TextWrapping="Wrap" TextAlignment="Center" Text="Максимальный возраст связи" />
+                        <AccessText TextWrapping="Wrap" TextAlignment="Center" Text="Edge max age" />
                     </Label.Content>
                 </Label>
                 <TextBox PreviewTextInput="TextInputPreviewer" Name="EdgeMaxAge" Width="100"
@@ -94,7 +94,7 @@
             <StackPanel Grid.Row="3">
                 <Label HorizontalAlignment="Center" Target="{Binding ElementName=MaxNeurons}">
                     <Label.Content>
-                        <AccessText TextWrapping="Wrap" TextAlignment="Center" Text="Максимальное количество нейронов" />
+                        <AccessText TextWrapping="Wrap" TextAlignment="Center" Text="Max number of neurons" />
                     </Label.Content>
                 </Label>
                 <TextBox PreviewTextInput="TextInputPreviewer" Name="MaxNeurons" Width="100"
@@ -105,7 +105,7 @@
             <StackPanel Grid.Row="4">
                 <Label HorizontalAlignment="Center" Target="{Binding ElementName=IsDying}">
                     <Label.Content>
-                        <AccessText TextWrapping="Wrap" TextAlignment="Center" Text="Принудительная смерть нейронов" />
+                        <AccessText TextWrapping="Wrap" TextAlignment="Center" Text="Force neuron dying" />
                     </Label.Content>
                 </Label>
                 <CheckBox Name="IsDying" IsChecked="{Binding IsForceDying}" HorizontalAlignment="Center" />

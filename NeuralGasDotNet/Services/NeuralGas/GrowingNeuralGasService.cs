@@ -286,7 +286,7 @@ namespace NeuralGasDotNet.Services.NeuralGas
         {
             WinnerLearningRate *= LearningRateDecay;
             NeighboursLearningRate *= LearningRateDecay;
-            NeuralNetworkLog += $"Нейронный газ: Конец эпохи {epoch + 1}" +
+            NeuralNetworkLog += $"Neural gas: End of epoch {epoch + 1}" +
                                 Environment
                                     .NewLine;
         }
@@ -294,7 +294,7 @@ namespace NeuralGasDotNet.Services.NeuralGas
         private void PreEpoch(int epoch)
         {
             ++TotalEpoch;
-            NeuralNetworkLog += $"Нейронный газ: Начало эпохи {epoch + 1}"
+            NeuralNetworkLog += $"Neural gas: Beginning of epoch {epoch + 1}"
                                 + Environment
                                     .NewLine;
             Order.Shuffle();

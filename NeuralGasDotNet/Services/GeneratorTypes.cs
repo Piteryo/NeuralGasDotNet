@@ -4,10 +4,10 @@ namespace NeuralGasDotNet.Services
 {
     public enum GeneratorTypes
     {
-        [Description("Круг с линией")] CircleWithLine,
-        [Description("5 холмов")] FiveHills,
-        [Description("2 окружности")] TwoBlobs,
-        [Description("Окружность внутри окружности")] BlobInsideBlob,
-        [Description("Несколько окружностей")] Donut
+        [Description("Circle with line")] CircleWithLine,
+        [Description("5 hills")] FiveHills,
+        [Description("2 blobs")] TwoBlobs,
+        [Description("Blob inside blob")] BlobInsideBlob,
+        [Description("Several blobs")] Donut
     }
 }
