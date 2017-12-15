@@ -1,25 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Troschuetz.Random;
 
 namespace NeuralGasDotNet.Services.NeuralGas.DataGeneration
 {
     public static class DataGenerator
     {
-        public static List<(double, double)> GenerateLineInsideCircle(int sizeOfCluster = 100,
+        public static async Task<List<(double, double)>> GenerateLineInsideCircle(int sizeOfCluster = 100,
             double circleRadius = 1.0)
         {
             var returnValue = GenerateRandomArray(sizeOfCluster, circleRadius);
             var randomAngles = new List<double>();
             var distributor = new ContinuousUniformDistribution();
-            for (var i = 0; i < sizeOfCluster; ++i)
+            await Task.Run(() =>
             {
-                randomAngles.Add(distributor.NextDouble() * 1337);
-                returnValue[i] =
-                    (returnValue[i].Item1 + Math.Sin(randomAngles[i]) * circleRadius, returnValue[i].Item2 +
-                                                                                      Math.Cos(randomAngles[i]) *
-                                                                                      circleRadius);
-            }
+                for (var i = 0; i < sizeOfCluster; ++i)
+                {
+                    randomAngles.Add(distributor.NextDouble() * 1337);
+                    returnValue[i] =
+                        (returnValue[i].Item1 + Math.Sin(randomAngles[i]) * circleRadius, returnValue[i].Item2 +
+                                                                                          Math.Cos(randomAngles[i]) *
+                                                                                          circleRadius);
+                }
+            });
             returnValue.AddRange(GenerateRandomArray(sizeOfCluster, circleRadius, false));
             return returnValue;
         }

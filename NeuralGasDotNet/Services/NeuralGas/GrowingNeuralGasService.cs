@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using MathNet.Numerics.LinearAlgebra;
 using NeuralGasDotNet.Extensions;
 using NeuralGasDotNet.Interfaces;
@@ -120,14 +121,17 @@ namespace NeuralGasDotNet.Services.NeuralGas
                 .ToList();
         }
 
-        public void Fit(List<(double, double)> x, int numberOfEpochs)
+        public async Task Fit(List<(double, double)> x, int numberOfEpochs)
         {
             Order = Enumerable.Range(0, x.Count).ToList();
             for (var epoch = 0; epoch < numberOfEpochs; ++epoch)
             {
                 PreEpoch(epoch);
-                foreach (var i in Order)
-                    FitOne(x[i]);
+                await Task.Run(() =>
+                {
+                    foreach (var i in Order)
+                        FitOne(x[i]);
+                });
                 PostEpoch(epoch);
             }
         }

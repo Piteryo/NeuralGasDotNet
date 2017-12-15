@@ -18,6 +18,7 @@ namespace NeuralGasDotNet.ViewModels
         private readonly NeuralGasModel _neuralGasModel;
         private GeneratorTypes _currentEffectStyle;
         private double _learningRateDecay;
+        private bool _buttonsVisibility;
 
         public MainViewModel(IGrowingNeuralGasService neuralGasService)
         {
@@ -27,19 +28,28 @@ namespace NeuralGasDotNet.ViewModels
             NumberOfEpochs = 20;
             LearningRateDecay = 1.0;
             MaxNumberOfNeurons = 50;
+            ButtonsVisibility = true;
             SelectedItem = new KeyValuePair<string, string>(GeneratorTypes.CircleWithLine.ToString(), GeneratorTypes.CircleWithLine.Description());
-            ShowDataCommand = new DelegateCommand(() =>
+            ShowDataCommand = new DelegateCommand(async () =>
             {
                 GeneratorTypes selectedItem;
                 if (Enum.TryParse(SelectedItem.Key, out selectedItem))
-                    _neuralGasModel.GenerateData(selectedItem);
+                {
+                    ButtonsVisibility = false;
+                    await _neuralGasModel.GenerateData(selectedItem);
+                    ButtonsVisibility = true;
+                }
             });
-            StartTrainingCommand = new DelegateCommand(() =>
+            StartTrainingCommand = new DelegateCommand(async () =>
             {
                 GeneratorTypes selectedItem;
                 if (Enum.TryParse(SelectedItem.Key, out selectedItem))
-                    _neuralGasModel.Init(NumberOfEpochs, LearningRateDecay, EdgeMaxAge, MaxNumberOfNeurons,
+                {
+                    ButtonsVisibility = false;
+                    await _neuralGasModel.Init(NumberOfEpochs, LearningRateDecay, EdgeMaxAge, MaxNumberOfNeurons,
                         IsForceDying, selectedItem);
+                    ButtonsVisibility = true;
+                }
             });
         }
 
@@ -60,6 +70,16 @@ namespace NeuralGasDotNet.ViewModels
             .GetAllValuesAndDescriptions<GeneratorTypes>();
 
         public DelegateCommand ShowDataCommand { get; }
+
+        public bool ButtonsVisibility
+        {
+            get => _buttonsVisibility;
+            set
+            {
+                _buttonsVisibility = value;
+                RaisePropertyChanged(nameof(ButtonsVisibility));
+            }
+        }
 
         public DelegateCommand StartTrainingCommand { get; }
         public SeriesCollection SeriesChartsCollection => _neuralGasModel.SeriesChartsCollection;

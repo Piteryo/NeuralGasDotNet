@@ -10,14 +10,6 @@
         mc:Ignorable="d"
         d:DesignHeight="800" d:DesignWidth="800"
         Title="Нейронный газ">
-    <!--<Window.Resources>
-        <ObjectDataProvider x:Key="DataFromEnum" MethodName="GetValues"
-                            ObjectType="{x:Type system:Enum}">
-            <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="styleAlias:GeneratorTypes" />
-            </ObjectDataProvider.MethodParameters>
-        </ObjectDataProvider>
-    </Window.Resources>-->
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -29,11 +21,11 @@
             <ColumnDefinition Width="4*" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <Button Grid.Row="0" Grid.Column="0" Margin="0, 10, 0, 0" HorizontalAlignment="Center" Width="500"
+        <Button Grid.Row="0" IsEnabled="{Binding ButtonsVisibility}" Grid.Column="0" Margin="0, 10, 0, 0" HorizontalAlignment="Center" Width="500"
                 Command="{Binding ShowDataCommand}">
             Отобразить входные данные
         </Button>
-        <Button Grid.Row="1" Grid.Column="0" Margin="0, 10, 0, 0" Width="500" HorizontalAlignment="Center"
+        <Button Grid.Row="1" IsEnabled="{Binding ButtonsVisibility}" Grid.Column="0" Margin="0, 10, 0, 0" Width="500" HorizontalAlignment="Center"
                 Command="{Binding StartTrainingCommand}">
             Начать обучение нейросети
         </Button>

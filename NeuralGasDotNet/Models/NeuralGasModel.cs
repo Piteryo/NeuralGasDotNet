@@ -3,6 +3,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Windows.Media;
 using LiveCharts;
 using LiveCharts.Defaults;
@@ -52,11 +53,11 @@ namespace NeuralGasDotNet.Models
 
         public ChartValues<ObservablePoint> InputDataChartValues { get; set; }
 
-        public void Init(int numberOfEpochs, double learningRateDecay, int edgeMaxAge, int maxNumberOfNeurons,
+        public async Task Init(int numberOfEpochs, double learningRateDecay, int edgeMaxAge, int maxNumberOfNeurons,
             bool isForceDying, GeneratorTypes generatorType)
         {
             if (X == null || !X.Any() || generatorType != _currentGeneratorType)
-                GenerateData(generatorType);
+                await GenerateData(generatorType);
 
             _growingNeuralGasService.Init(new List<(double, double)>
                 {
@@ -72,7 +73,7 @@ namespace NeuralGasDotNet.Models
                 0.99,
                 isForceDying);
 
-            _growingNeuralGasService.Fit(X, numberOfEpochs);
+            await _growingNeuralGasService.Fit(X, numberOfEpochs);
             W = _growingNeuralGasService.GetWeights();
             C = _growingNeuralGasService.GetConnectionsIdxPairs();
             ShowWeightsAndConnections();
@@ -115,7 +116,7 @@ namespace NeuralGasDotNet.Models
             RaisePropertyChanged(nameof(SeriesChartsCollection));
         }
 
-        public List<(double, double)> GenerateData(GeneratorTypes? generatorType)
+        public async Task GenerateData(GeneratorTypes? generatorType)
         {
             switch (generatorType)
             {
@@ -123,7 +124,7 @@ namespace NeuralGasDotNet.Models
                     if (X == null || generatorType != _currentGeneratorType)
                     {
                         _currentGeneratorType = generatorType;
-                        X = DataGenerator.GenerateLineInsideCircle(150);
+                        X = await DataGenerator.GenerateLineInsideCircle(150);
                         InputDataChartValues = X.ToChartValues();
                         SeriesChartsCollection = new SeriesCollection
                         {
@@ -244,7 +245,6 @@ namespace NeuralGasDotNet.Models
                     }
                     break;
             }
-            return X;
         }
     }
 }

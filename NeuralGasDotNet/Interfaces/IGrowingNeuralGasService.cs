@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Threading.Tasks;
 
 namespace NeuralGasDotNet.Interfaces
 {
@@ -19,7 +20,7 @@ namespace NeuralGasDotNet.Interfaces
             bool forceDying = false);
 
         List<(int, int)> GetConnectionsIdxPairs();
-        void Fit(List<(double, double)> x, int numberOfEpochs);
+        Task Fit(List<(double, double)> x, int numberOfEpochs);
         List<(double, double)> GetWeights();
     }
 }
